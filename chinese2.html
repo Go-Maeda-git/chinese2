@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>中国語期末 L7-L12 完全網羅</title>
+    <style>
+        :root { --primary: #27ae60; --accent: #e67e22; --bg: #fdfefe; }
+        body { font-family: 'Helvetica Neue', Arial, "Hiragino Sans", sans-serif; background: var(--bg); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .container { max-width: 600px; width: 100%; }
+        .card { background: white; border-radius: 20px; padding: 40px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.08); text-align: center; min-height: 250px; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; position: relative; border: 1px solid #eee; }
+        .chinese { font-size: 26px; color: #2c3e50; margin-bottom: 8px; font-weight: bold; line-height: 1.4; }
+        .pinyin { font-size: 18px; color: #95a5a6; margin-bottom: 20px; }
+        .japanese { font-size: 20px; color: var(--accent); font-weight: 500; }
+        .controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button { border: none; padding: 15px; border-radius: 12px; font-size: 16px; cursor: pointer; transition: 0.2s; font-weight: bold; }
+        .btn-main { background: var(--primary); color: white; grid-column: span 2; }
+        .btn-sub { background: #ecf0f1; color: #7f8c8d; }
+        .active { background: #e74c3c !important; color: white; }
+        #progress { color: #999; margin-top: 15px; font-size: 13px; text-align: center; }
+        .tag { position: absolute; top: 15px; left: 15px; background: #eef9f1; color: #27ae60; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2 style="text-align:center; color: var(--primary);">📖 中国語 L7-L12 コンプリート</h2>
+        
+        <div class="card" id="main-card">
+            <div id="cat-tag" class="tag">セクション</div>
+            <div id="cn-txt" class="chinese">開始ボタンをタップ</div>
+            <div id="py-txt" class="pinyin">Ready to Start</div>
+            <div id="jp-txt" class="japanese">意味が表示されます</div>
+        </div>
+
+        <div class="controls">
+            <button id="play-btn" class="btn-main">▶ 次へ / 開始</button>
+            <button id="auto-btn" class="btn-sub">自動再生: OFF</button>
+            <button id="shuffle-btn" class="btn-sub">シャッフル</button>
+        </div>
+        
+        <div id="progress">進捗: 0 / 152</div>
+    </div>
+
+    <script>
+        const studyData = [
+            // 1. 助動詞と能力・許可
+            {cat:"助動詞", cn:"会", py:"huì", jp:"（練習して）～できる"},
+            {cat:"助動詞", cn:"能", py:"néng", jp:"（能力・条件で）～できる"},
+            {cat:"助動詞", cn:"可以", py:"kěyǐ", jp:"～してもよい、～できる"},
+            {cat:"助動詞", cn:"想", py:"xiǎng", jp:"～したい"},
+            {cat:"助動詞", cn:"要", py:"yào", jp:"～したい、～するつもりだ"},
+            {cat:"助動詞", cn:"愿意", py:"yuànyì", jp:"喜んで～する"},
+            {cat:"単語", cn:"开车", py:"kāi chē", jp:"車を運転する"},
+            {cat:"単語", cn:"游泳", py:"yóuyǒng", jp:"泳ぐ"},
+            {cat:"単語", cn:"换", py:"huàn", jp:"取り替える"},
+            {cat:"単語", cn:"参加", py:"cānjiā", jp:"参加する"},
+            {cat:"単語", cn:"接", py:"jiē", jp:"（電話に）出る、出迎える"},
+            {cat:"単語", cn:"送", py:"sòng", jp:"プレゼントする、見送る"},
+            {cat:"短文", cn:"你会开车吗？", py:"Nǐ huì kāichē ma?", jp:"あなたは車を運転できますか？"},
+            {cat:"短文", cn:"我会。", py:"Wǒ huì.", jp: "できます。"},
+            {cat:"短文", cn:"我可以坐在这儿吗？", py:"Wǒ kěyǐ zuòzài zhèr ma?", jp: "ここに座ってもいいですか？"},
+            {cat:"短文", cn:"可以，请坐！", py:"Kěyǐ, qǐng zuò!", jp: "いいですよ、どうぞ座ってください！"},
+            {cat:"短文", cn:"你应该坐在这儿。", py:"Nǐ yīnggāi zuòzài zhèr.", jp: "あなたはここに座るべきです。"},
+            {cat:"短文", cn:"不能游泳。", py:"Bù néng yóuyǒng.", jp: "泳いではいけません。"},
+            {cat:"短文", cn:"我想问您一个问题。", py:"Wǒ xiǎng wèn nín yí ge wèntí.", jp: "一つ質問したいことがあります。"},
+            {cat:"短文", cn:"请给我一个机会。", py:"Qǐng gěi wǒ yí ge jīhui.", jp: "チャンスをください。"},
+
+            // 2. 進行・持続
+            {cat:"進行", cn:"在", py:"zài", jp: "～している（進行）"},
+            {cat:"進行", cn:"正在", py:"zhèngzài", jp: "ちょうど～しているところだ"},
+            {cat:"持続", cn:"着", py:"zhe", jp: "～している（状態の持続）"},
+            {cat:"単語", cn:"干什么", py:"gàn shénme", jp: "何をする"},
+            {cat:"単語", cn:"做作业", py:"zuò zuòyè", jp: "宿題をする"},
+            {cat:"単語", cn:"休息", py:"xiūxi", jp: "休憩する"},
+            {cat:"単語", cn:"找", py:"zhǎo", jp: "探す"},
+            {cat:"単語", cn:"拿", py:"ná", jp: "持つ"},
+            {cat:"単語", cn:"穿", py:"chuān", jp: "着る、履く"},
+            {cat:"単語", cn:"戴", py:"dài", jp: "（小物を）身に着ける、被る"},
+            {cat:"短文", cn:"他在干什么呢？", py:"Tā zài gàn shénme ne?", jp: "彼は何をしていますか？"},
+            {cat:"短文", cn:"他在做作业。", py:"Tā zài zuò zuòyè.", jp: "彼は宿題をしています。"},
+            {cat:"短文", cn:"门关着。", py:"Mén guānzhe.", jp: "ドアが閉まっています。"},
+            {cat:"短文", cn:"窗户开着。", py:"Chuānghu kāizhe.", jp: "窓が開いています。"},
+            {cat:"短文", cn:"老师站着上課。", py:"Lǎoshī zhànzhe shàngkè.", jp: "先生は立って授業をします。"},
+            {cat:"短文", cn:"我们坐着学習。", py:"Wǒmen zuòzhe xuéxí.", jp: "私たちは座って勉強します。"},
+            {cat:"単語", cn:"打算", py:"dǎsuan", jp: "～するつもりだ"},
+            {cat:"短文", cn:"你下午打算干什么？", py:"Nǐ xiàwǔ dǎsuan gàn shénme?", jp: "午後、何をするつもりですか？"},
+            {cat:"短文", cn:"我打算去看电影。", py:"Wǒ dǎsuan qù kàn diànyǐng.", jp: "映画を見に行くつもりです。"},
+            {cat:"短文", cn:"我不打算给他打电话。", py:"Wǒ bù dǎsuan gěi tā dǎ diànhuà.", jp: "彼に電話をかけるつもりはありません。"},
+
+            // 3. 経験・完了・変化
+            {cat:"経験", cn:"过", py:"guo", jp: "～したことがある"},
+            {cat:"完了", cn:"了", py:"le", jp: "実現・完了、または変化"},
+            {cat:"単語", cn:"刚才", py:"gāngcái", jp: "さっき"},
+            {cat:"単語", cn:"已经", py:"yǐjīng", jp: "すでに、もう"},
+            {cat:"単語", cn:"以前", py:"yǐqián", jp: "以前"},
+            {cat:"単語", cn:"以后", py:"yǐhòu", jp: "以後、～した後"},
+            {cat:"単語", cn:"去过", py:"qùguo", jp: "行ったことがある"},
+            {cat:"単語", cn:"见过", py:"jiànguo", jp: "会ったことがある"},
+            {cat:"単語", cn:"踢足球", py:"tī zúqiú", jp: "サッカーをする"},
+            {cat:"単語", cn:"打网球", py:"dǎ wǎngqiú", jp: "テニスをする"},
+            {cat:"短文", cn:"你去过西安吗？", py:"Nǐ qùguo Xī'ān ma?", jp: "西安へ行ったことがありますか？"},
+            {cat:"短文", cn:"我还没去过。", py:"Wǒ hái méi qùguo.", jp: "まだ行ったことがありません。"},
+            {cat:"短文", cn:"你刚才去哪儿了？", py:"Nǐ gāngcái qù nǎr le?", jp: "さっきどこへ行きましたか？"},
+            {cat:"短文", cn:"我去踢足球了。", py:"Wǒ qù tī zúqiú le.", jp: "サッカーをしに行きました。"},
+            {cat:"短文", cn:"他变胖了。", py:"Tā biàn pàng le.", jp: "彼は太りました（変化）。"},
+            {cat:"短文", cn:"天冷了。", py:"Tiān lěng le.", jp: "寒くなりました。"},
+            {cat:"短文", cn:"夏天到了。", py:"Xiàtiān dào le.", jp: "夏が来ました。"},
+            {cat:"短文", cn:"我明白了。", py:"Wǒ míngbai le.", jp: "わかりました。"},
+            {cat:"短文", cn:"还没吃饭。", py:"Hái méi chīfàn.", jp: "まだご飯を食べていません。"},
+            {cat:"短文", cn:"再说一遍。", py:"Zài shuō yí biàn.", jp: "もう一度言ってください。"},
+
+            // 4. 時間量・様態補語・交通手段
+            {cat:"時間", cn:"小时", py:"xiǎoshí", jp: "時間（長さ）"},
+            {cat:"時間", cn:"分钟", py:"fēnzhōng", jp: "分（長さ）"},
+            {cat:"単語", cn:"每天", py:"měitiān", jp: "毎日"},
+            {cat:"単語", cn:"起床", py:"qǐchuáng", jp: "起床する"},
+            {cat:"単語", cn:"睡觉", py:"shuìjiào", jp: "寝る"},
+            {cat:"様態補語", cn:"得", py:"de", jp: "～するのが～だ"},
+            {cat:"形容詞", cn:"早", py:"zǎo", jp: "早い"},
+            {cat:"形容詞", cn:"晚", py:"wǎn", jp: "遅い"},
+            {cat:"形容詞", cn:"快", py:"kuài", jp: "速い"},
+            {cat:"形容詞", cn:"慢", py:"màn", jp: "遅い（速度）"},
+            {cat:"疑問詞", cn:"怎么", py:"zěnme", jp: "どのように"},
+            {cat:"単語", cn:"坐", py:"zuò", jp: "（乗り物に）乗る"},
+            {cat:"単語", cn:"骑", py:"qí", jp: "（またがって）乗る"},
+            {cat:"単語", cn:"地铁", py:"dìtiě", jp: "地下鉄"},
+            {cat:"単語", cn:"公共汽车", py:"gōnggòngqìchē", jp: "バス"},
+            {cat:"短文", cn:"你每天睡几个小时？", py:"Nǐ měitiān shuì jǐ ge xiǎoshí?", jp: "毎日何時間寝ますか？"},
+            {cat:"短文", cn:"我每天睡七个小时。", py:"Wǒ měitiān shuì qī ge xiǎoshí.", jp: "毎日7時間寝ます。"},
+            {cat:"短文", cn:"你睡得真早！", py:"Nǐ shuìde zhēn zǎo!", jp: "あなたは寝るのが本当に早いですね！"},
+            {cat:"短文", cn:"他歌唱得最好。", py:"Tā gē chàngde zuì hǎo.", jp: "彼は歌を歌うのが一番上手です。"},
+            {cat:"短文", cn:"你怎么来学校？", py:"Nǐ zěnme lái xuéxiào?", jp: "どうやって学校に来ますか？"},
+            {cat:"短文", cn:"我坐电车来。", py:"Wǒ zuò diànchē lái.", jp: "電車で来ます。"},
+            {cat:"短文", cn:"这个汉字怎么写？", py:"Zhège Hànzì zěnme xiě?", jp: "この漢字はどう書きますか？"},
+            {cat:"短文", cn:"你怎么不告诉我？", py:"Nǐ zěnme bù gàosu wǒ?", jp: "なぜ私に教えてくらないのですか？"},
+            {cat:"短文", cn:"让您久等了。", py:"Ràng nín jiǔděng le.", jp: "お待たせしました。"},
+            {cat:"短文", cn:"请慢走。", py:"Qǐng mànzǒu.", jp: "お気をつけてお帰りください。"},
+
+            // 5. 買い物・比較
+            {cat:"単語", cn:"颜色", py:"yánsè", jp: "色"},
+            {cat:"色", cn:"红色", py:"hóngsè", jp: "赤"},
+            {cat:"色", cn:"蓝色", py:"lánsè", jp: "青"},
+            {cat:"単語", cn:"漂亮", py:"piàoliang", jp: "きれいだ"},
+            {cat:"疑問", cn:"多少钱", py:"duōshao qián", jp: "いくら"},
+            {cat:"副詞", cn:"一共", py:"yígòng", jp: "合計で"},
+            {cat:"単位", cn:"块", py:"kuài", jp: "元（通貨単位）"},
+            {cat:"比較", cn:"比", py:"bǐ", jp: "～より"},
+            {cat:"比較", cn:"一样", py:"yíyàng", jp: "同じだ"},
+            {cat:"単語", cn:"爱好", py:"àihào", jp: "趣味"},
+            {cat:"単語", cn:"旅行", py:"lǚxíng", jp: "旅行する"},
+            {cat:"短文", cn:"你想买什么？", py:"Nǐ xiǎng mǎi shénme?", jp: "何を買いたいですか？"},
+            {cat:"短文", cn:"我想买一件毛衣。", py:"Wǒ xiǎng mǎi yí jiàn máoyī.", jp: "セーターを1枚買いたい。"},
+            {cat:"短文", cn:"一共一千八百块。", py:"Yígòng yìqiān bābǎi kuài.", jp: "全部で1800元です。"},
+            {cat:"短文", cn:"绿茶比红茶好喝。", py:"Lǜchá bǐ hóngchá hǎohē.", jp: "緑茶は紅茶よりおいしい。"},
+            {cat:"短文", cn:"我和你一样。", py:"Wǒ hé nǐ yíyàng.", jp: "私はあなたと同じです。"},
+            {cat:"短文", cn:"你的爱好是什么？", py:"Nǐ de àihào shì shénme?", jp: "あなたの趣味は何ですか？"},
+            {cat:"短文", cn:"我的爱好是看电影。", py:"Wǒ de àihào shì kàn diànyǐng.", jp: "私の趣味は映画を見ることです。"},
+            {cat:"短文", cn:"今天比昨天暖和。", py:"Jīntiān bǐ zuótiān nuǎnhuo.", jp: "今日は昨日より暖かいです。"},
+            {cat:"短文", cn:"我比小李大两岁。", py:"Wǒ bǐ Xiǎo Lǐ dà liǎng suì.", jp: "私は李さんより2歳年上です。"},
+            {cat:"単語", cn:"还是", py:"háishi", jp: "それとも"},
+            {cat:"短文", cn:"你喝红茶还是喝绿茶？", py:"Nǐ hē hóngchá háishi hē lǜchá?", jp: "紅茶ですか、それとも緑茶ですか？"},
+            {cat:"単語", cn:"觉得", py:"juéde", jp: "～と思う、感じる"},
+            {cat:"単語", cn:"好吃", py:"hǎochī", jp: "おいしい"},
+            {cat:"単語", cn:"好听", py:"hǎotīng", jp: "聞いて心地よい"},
+
+            // 6. その他・語彙・禁止
+            {cat:"副詞", cn:"真", py:"zhēn", jp: "本当に"},
+            {cat:"副詞", cn:"太...了", py:"tài... le", jp: "とても～だ、～すぎる"},
+            {cat:"禁止", cn:"别", py:"bié", jp: "～するな"},
+            {cat:"禁止", cn:"不要", py:"búyào", jp: "～してはいけない"},
+            {cat:"禁止", cn:"不用", py:"búyòng", jp: "～する必要はない"},
+            {cat:"単語", cn:"以后", py:"yǐhòu", jp: "～のあと"},
+            {cat:"単語", cn:"以前", py:"yǐqián", jp: "～のまえ"},
+            {cat:"前置詞", cn:"给", py:"gěi", jp: "～に、～へ（対象）"},
+            {cat:"単語", cn:"等", py:"děng", jp: "待つ"},
+            {cat:"単語", cn:"教", py:"jiāo", jp: "教える"},
+            {cat:"単語", cn:"告诉", py:"gàosu", jp: "教える、告げる"},
+            {cat:"単語", cn:"准备", py:"zhǔnbèi", jp: "準備する"},
+            {cat:"単語", cn:"開始", py:"kāishǐ", jp: "始める"},
+            {cat:"単語", cn:"努力", py:"nǔlì", jp: "努力する"},
+            {cat:"単語", cn:"认真", py:"rènzhēn", jp: "真面目だ"},
+            {cat:"単語", cn:"緊張", py:"jǐnzhāng", jp: "緊張する"},
+            {cat:"単語", cn:"害怕", py:"hàipà", jp: "怖がる"},
+            {cat:"短文", cn:"别紧张。", py:"Bié jǐnzhāng.", jp: "緊張しないで。"},
+            {cat:"短文", cn:"你別忘了我。", py:"Nǐ bié wàngle wǒ.", jp: "私を忘れないで。"},
+            {cat:"短文", cn:"请別在这儿抽烟。", py:"Qǐng bié zài zhèr chōuyān.", jp: "ここでタバコを吸わないでください。"},
+            {cat:"短文", cn:"王老师教我们历史。", py:"Wáng lǎoshī jiāo wǒmen lìshǐ.", jp: "王先生は私たちに歴史を教えます。"},
+            {cat:"短文", cn:"你听见了吗？", py:"Nǐ tīngjiàn le ma?", jp: "聞こえましたか？"},
+            {cat:"挨拶", cn:"祝贺您！", py:"Zhùhè nín!", jp: "おめでとうございます！"},
+            {cat:"挨拶", cn:"新年快乐！", py:"Xīnnián kuàilè!", jp: "あけましておめでとう。"},
+            {cat:"挨拶", cn:"辛苦了！", py:"Xīnkǔ le!", jp: "お疲れ様でした。"},
+            {cat:"挨拶", cn:"认识您，很高兴。", py:"Rènshi nín, hěn gāoxìng.", jp: "お会いできて嬉しいです。"},
+            {cat:"挨拶", cn:"请原谅。", py:"Qǐng yuánliàng.", jp: "お許しください。"},
+            {cat:"挨拶", cn:"没关系。", py:"Méi guānxi.", jp: "大丈夫です。"},
+            {cat:"短文", cn:"你最近怎么样？", py:"Nǐ zuìjìn zěnmeyàng?", jp: "最近どうですか？"},
+            {cat:"短文", cn:"忙不忙？", py:"Máng bù máng?", jp: "忙しいですか？"},
+            {cat:"体調", cn:"饿了", py:"è le", jp: "お腹が空いた"},
+            {cat:"体調", cn:"渴了", py:"kě le", jp: "喉が渇いた"},
+            {cat:"体調", cn:"累了", py:"lèi le", jp: "疲れた"},
+            {cat:"体調", cn:"不舒服", py:"bù shūfu", jp: "体調が悪い"},
+            {cat:"頻度", cn:"刚才", py:"gāngcái", jp: "さっき"},
+            {cat:"頻度", cn:"总是", py:"zǒngshì", jp: "いつも"},
+            {cat:"頻度", cn:"经常", py:"jīngcháng", jp: "よく、しばしば"},
+            {cat:"頻度", cn:"有时候", py:"yǒu shíhou", jp: "時々"},
+            {cat:"挨拶", cn:"下星期见！", py:"Xià xīngqī jiàn!", jp: "また来週！"},
+            {cat:"挨拶", cn:"今天的课就到这儿。", py:"Jīntiān de kè jiù dào zhèr.", jp: "今日の授業はここまでです。"}
+        ];
+
+        let currentData = [...studyData];
+        let currentIndex = 0;
+        let isAuto = false;
+        const synth = window.speechSynthesis;
+
+        function updateUI() {
+            const item = currentData[currentIndex];
+            document.getElementById('cat-tag').innerText = item.cat;
+            document.getElementById('cn-txt').innerText = item.cn;
+            document.getElementById('py-txt').innerText = item.py;
+            document.getElementById('jp-txt').innerText = "...";
+            document.getElementById('progress').innerText = `進捗: ${currentIndex + 1} / ${currentData.length}`;
+        }
+
+        function speak(text, lang, callback) {
+            const uttr = new SpeechSynthesisUtterance(text);
+            uttr.lang = lang;
+            uttr.rate = 0.9;
+            uttr.onend = callback;
+            synth.speak(uttr);
+        }
+
+        function play() {
+            if (currentIndex >= currentData.length) {
+                document.getElementById('cn-txt').innerText = "学習完了！";
+                document.getElementById('jp-txt').innerText = "試験頑張ってください！";
+                return;
+            }
+            updateUI();
+            const item = currentData[currentIndex];
+            
+            speak(item.cn, 'zh-CN', () => {
+                setTimeout(() => {
+                    document.getElementById('jp-txt').innerText = item.jp;
+                    speak(item.jp, 'ja-JP', () => {
+                        currentIndex++;
+                        if (isAuto) {
+                            setTimeout(play, 1500);
+                        }
+                    });
+                }, 1000);
+            });
+        }
+
+        document.getElementById('play-btn').addEventListener('click', () => {
+            if (synth.speaking) return;
+            play();
+        });
+
+        document.getElementById('auto-btn').addEventListener('click', (e) => {
+            isAuto = !isAuto;
+            e.target.innerText = `自動再生: ${isAuto ? 'ON' : 'OFF'}`;
+            e.target.classList.toggle('active', isAuto);
+            if(isAuto && !synth.speaking) play();
+        });
+
+        document.getElementById('shuffle-btn').addEventListener('click', () => {
+            currentData.sort(() => Math.random() - 0.5);
+            currentIndex = 0;
+            alert("シャッフル完了！最初から再生します。");
+            updateUI();
+        });
+    </script>
+</body>
+</html>
